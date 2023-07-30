@@ -83,7 +83,6 @@ int main() {
                 averageMakespan += makespan;
                 auto end_time = chrono::high_resolution_clock::now();
                 auto duration_ms = chrono::duration_cast<chrono::milliseconds>(end_time - start_time);
-                averageMakespan /= 10.0;
                 cout << " Monotona - Maquinas: " << m << ", Tarefas: " << numTasks
                      << ", Makespan: " << averageMakespan
                      << ", iteracao: " << iteracao
