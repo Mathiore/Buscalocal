@@ -78,19 +78,17 @@ int main() {
 
             for(int iteracao : iteracoes){
                 double averageMakespan = 0;
-
-                for (run = 1; run <= 10; run++) {
                 vector<int> assignment = localSearchMonotonic(processingTimes, m, maxIterations);
                 int makespan = calculateMakespan(processingTimes, assignment);
                 averageMakespan += makespan;
-                }
                 auto end_time = chrono::high_resolution_clock::now();
-                averageMakespan /= 10.0;
                 auto duration_ms = chrono::duration_cast<chrono::milliseconds>(end_time - start_time);
+                averageMakespan /= 10.0;
                 cout << " Monotona - Maquinas: " << m << ", Tarefas: " << numTasks
                      << ", Makespan: " << averageMakespan
                      << ", iteracao: " << iteracao
-                     << ", Tempo: " << duration_ms.count() << " ms " << endl;
+                     << ", Tempo: " << duration_ms.count() << " ms "<<endl;
+
             }
         }
     }
