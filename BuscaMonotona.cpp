@@ -4,6 +4,7 @@
 #include <random>
 #include <math.h>
 #include <chrono>
+#include <fstream>
 
 using namespace std;
 
@@ -60,7 +61,7 @@ vector<int> localSearchMonotonic(const vector<int>& processingTimes, int numMach
 
 int main() {
     srand(time(0));
-
+    ofstream outputFile("output.txt");
     // Definição dos parâmetros
     vector<int> numMachines = {10, 20, 50};
     vector<double> rValues = {1.5, 2.0};
@@ -83,10 +84,14 @@ int main() {
                 averageMakespan += makespan;
                 auto end_time = chrono::high_resolution_clock::now();
                 auto duration_ms = chrono::duration_cast<chrono::milliseconds>(end_time - start_time);
+                outputFile << "Monotona;" << m << ";" << numTasks
+                     << ";" << iteracao
+                     << ";" << duration_ms.count() << "ms"
+                     << ";" <<averageMakespan
+                     << ";N/A"<<endl;
                 cout << "Monotona;" << m << ";" << numTasks
                      << ";" << iteracao
                      << ";" << duration_ms.count() << "ms"
-
                      << ";" <<averageMakespan
                      << ";N/A"<<endl;
 
