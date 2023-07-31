@@ -5,7 +5,6 @@
 #include <math.h>
 #include <chrono>
 #include <fstream>
-
 using namespace std;
 
 // Função para calcular o makespan
@@ -19,7 +18,7 @@ int calculateMakespan(const vector<int>& processingTimes, const vector<int>& ass
 }
 
 // Função de busca local monótona randomizada
-vector<int> localSearchMonotonic(const vector<int>& processingTimes, int numMachines, int maxIterations) {
+vector<int> localSearchMonotonic(const vector<int>& processingTimes, int numMachines, int maxIterations, double alpha) {
     int numTasks = processingTimes.size();
 
     // Inicialização da solução inicial aleatória
@@ -28,12 +27,12 @@ vector<int> localSearchMonotonic(const vector<int>& processingTimes, int numMach
         assignment[i] = rand() % numMachines;
     }
 
-    // Realiza a busca local monótona randomizada
+    // Realiza a busca local monótona
     int iteration = 0;
-    while (iteration < maxIterations) {
+    int noImprovementCount = 0; // Contador de iterações sem melhora
+    while (iteration < maxIterations && noImprovementCount < 1000) {
         vector<int> bestAssignment = assignment;
         int bestMakespan = calculateMakespan(processingTimes, assignment);
-
         // Gera uma solução vizinha e a avalia
         for (int i = 0; i < numTasks; i++) {
             vector<int> neighborAssignment = assignment;
@@ -49,10 +48,19 @@ vector<int> localSearchMonotonic(const vector<int>& processingTimes, int numMach
 
         // Verifica se houve melhora
         if (bestAssignment == assignment) {
-            break;
+            noImprovementCount++; // Incrementa o contador de iterações sem melhora
+        } else {
+            assignment = bestAssignment;
+            noImprovementCount = 0; // Reseta o contador de iterações sem melhora
         }
 
-        assignment = bestAssignment;
+        // Realiza a caminhada aleatória com probabilidade alpha
+        if (static_cast<double>(rand()) / RAND_MAX < alpha) {
+            for (int i = 0; i < numTasks; i++) {
+                assignment[i] = rand() % numMachines;
+            }
+        }
+
         iteration++;
     }
 
@@ -76,26 +84,26 @@ int main() {
             for (int i = 0; i < numTasks; i++) {
                 processingTimes[i] = rand() % 100 + 1; // Tempo entre 1 e 100
             }
+            for (double alpha: {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9}){
+                for(int iteracao : iteracoes){
+                    double averageMakespan = 0;
+                    vector<int> assignment = localSearchMonotonic(processingTimes, m, maxIterations, alpha);
+                    int makespan = calculateMakespan(processingTimes, assignment);
+                    averageMakespan += makespan;
+                    auto end_time = chrono::high_resolution_clock::now();
+                    auto duration_ms = chrono::duration_cast<chrono::milliseconds>(end_time - start_time);
+                    outputFile << "Monotona;" << m << ";" << numTasks
+                         << ";" << iteracao
+                         << ";" << duration_ms.count() << "ms"
+                         << ";" <<averageMakespan
+                         << ";"<< alpha <<endl;
+                    cout << "Monotona;" << m << ";" << numTasks
+                         << ";" << iteracao
+                         << ";" << duration_ms.count() << "ms"
+                         << ";" <<averageMakespan
+                         << ";"<<alpha <<endl;
 
-            for(int iteracao : iteracoes){
-                double averageMakespan = 0;
-                vector<int> assignment = localSearchMonotonic(processingTimes, m, maxIterations);
-                int makespan = calculateMakespan(processingTimes, assignment);
-                averageMakespan += makespan;
-                auto end_time = chrono::high_resolution_clock::now();
-                auto duration_ms = chrono::duration_cast<chrono::milliseconds>(end_time - start_time);
-                outputFile << "Monotona;" << m << ";" << numTasks
-                     << ";" << iteracao
-                     << ";" << duration_ms.count() << "ms"
-                     << ";" <<averageMakespan
-                     << ";N/A"<<endl;
-                cout << "Monotona;" << m << ";" << numTasks
-                     << ";" << iteracao
-                     << ";" << duration_ms.count() << "ms"
-                     << ";" <<averageMakespan
-                     << ";N/A"<<endl;
-
-
+                }
             }
         }
     }
